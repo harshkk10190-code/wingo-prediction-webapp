@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import "../styles/globals.css";
 
 function getUTCPeriod() {
   const now = new Date();
