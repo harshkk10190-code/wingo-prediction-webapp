@@ -1,0 +1,79 @@
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #120b2e, #05050f);
+  color: white;
+  font-family: 'Arial', sans-serif;
+}
+
+.container {
+  text-align: center;
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.header {
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #00e5ff;
+  text-shadow: 0px 0px 15px #00e5ff;
+}
+
+.timer {
+  margin-top: 8px;
+  font-size: 20px;
+  color: #ffea00;
+}
+
+.prediction-box {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1f1c2c, #928dab);
+  box-shadow: 0px 0px 20px #ff00ff;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from { box-shadow: 0px 0px 10px #ff00ff; }
+  to { box-shadow: 0px 0px 25px #ff00ff; }
+}
+
+.prediction-text {
+  font-size: 60px;
+  font-weight: bold;
+  text-shadow: 0px 0px 20px lime;
+}
+
+.balls {
+  margin-top: 15px;
+}
+
+.ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff0080, #ff8c00);
+  font-size: 26px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0px 0px 15px #ff0080;
+}
+
+.history {
+  margin-top: 30px;
+  padding: 15px;
+  background: #0b0b14;
+  border-radius: 15px;
+  border: 1px solid #00e5ff;
+}
+
+.history-item {
+  margin: 5px 0;
+  font-size: 16px;
+}
