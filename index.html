@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#000000">
+<title>Kira Casino Pro – Smart 30S</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ================== THEME: AGGRESSIVE DARK ================== */
+:root {
+  --bg: #000000;
+  --card: #0b0b0d;
+  
+  /* PALETTE */
+  --gold: #ffc107;
+  --neon-blue: #00f3ff;
+  --neon-red: #ff3355;
+  --neon-green: #00e676;
+  --violet: #9d00ff;
+  
+  --border: 1px solid rgba(255,255,255,0.12);
+  --font-main: 'Outfit', sans-serif;
+  --font-tech: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+
+body {
+  margin: 0; background: var(--bg); color: #fff;
+  font-family: var(--font-main);
+  min-height: 100vh;
+  padding: env(safe-area-inset-top) 15px 15px 15px;
+  padding-top: max(15px, env(safe-area-inset-top)); 
+  display: flex; flex-direction: column;
+  overflow-x: hidden;
+}
+
+#floor-bg { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; 
+    background: radial-gradient(circle at 50% 0%, #1a0505 0%, #000 80%); /* Red tint for aggressive */
+}
+
+.container { max-width: 420px; margin: 0 auto; width: 100%; padding-bottom: 90px; }
+
+/* HEADER */
+.app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; }
+.app-title { font-size: 20px; font-weight: 900; letter-spacing: 1px; color: #fff; text-transform: uppercase; }
+.live-badge { 
+    font-size: 10px; font-weight: 800; background: rgba(255, 255, 255, 0.1); 
+    border: 1px solid #fff; padding: 4px 12px; border-radius: 20px; 
+    color: #fff;
+    display: flex; align-items: center; gap: 6px;
+}
+.live-dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; animation: pulseDot 1s infinite; }
+
+/* ================== REACTOR CARD ================== */
+.reactor {
+    background: var(--card); border: var(--border); border-radius: 28px;
+    padding: 0; margin-bottom: 15px;
+    display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+    position: relative; overflow: hidden;
+    transition: all 0.3s;
+}
+
+/* PERIOD TAG */
+.period-bar { width: 100%; display: flex; justify-content: center; padding-top: 15px; }
+.period-tag {
+    font-family: var(--font-tech); font-size: 13px; color: #fff; font-weight: 700;
+    background: rgba(255,255,255,0.05); padding: 6px 14px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1); letter-spacing: 1px;
+    display: flex; align-items: center; gap: 8px;
+}
+.period-tag::before {
+    content:''; width: 6px; height: 6px; background: var(--gold); border-radius: 50%;
+    box-shadow: 0 0 8px var(--gold); animation: pulseDot 1s infinite;
+}
+
+/* 30S TIMER */
+.timer-stage {
+    width: 100%; padding: 10px 0 5px; display: flex; justify-content: center; position: relative;
+}
+.timer-svg { transform: rotate(-90deg); width: 90px; height: 90px; }
+.timer-circle-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 5; }
+.timer-circle-fg {
+    fill: none; stroke: var(--gold); stroke-width: 5;
+    stroke-dasharray: 283; stroke-dashoffset: 0; 
+    transition: stroke-dashoffset 0.1s linear, stroke 0.3s; 
+    stroke-linecap: round;
+}
+.timer-text-overlay {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%);
+    font-family: var(--font-tech); font-size: 32px; font-weight: 800; color: #fff;
+}
+
+/* ================== BUDDY ================== */
+.buddy-stage {
+    position: relative; height: 160px; width: 100%;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+    margin-bottom: 10px; background: transparent;
+}
+
+.thought-bubble {
+    position: relative; margin-bottom: 15px; 
+    background: rgba(20, 20, 25, 0.8); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3);
+    padding: 8px 16px; border-radius: 14px;
+    font-size: 11px; font-weight: 700; font-family: var(--font-tech);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    opacity: 0; transform: translateY(10px) scale(0.9);
+    transition: all 0.3s; pointer-events: none; text-align: center;
+}
+.thought-bubble.show { opacity: 1; transform: translateY(0) scale(1); }
+
+.bot-container { 
+    position: relative; width: 100px; height: 100px; display: flex; justify-content: center; 
+    animation: hoverSafe 4s ease-in-out infinite; cursor: pointer;
+}
+.bot-container.poke { animation: flinch 0.3s ease-out; }
+
+.antenna-rod { position: absolute; top: -20px; width: 3px; height: 25px; background: #444; z-index: 4; }
+.antenna-tip { position: absolute; top: -28px; width: 10px; height: 10px; background: #666; border-radius: 50%; z-index: 5; transition: 0.1s; }
+.antenna-tip.spark { background: #fff; box-shadow: 0 0 15px var(--gold); transform: scale(1.3); }
+
+.bot-head {
+    width: 90px; height: 90px; border-radius: 28px;
+    background: linear-gradient(145deg, #0a0a0a, #000);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px;
+    z-index: 5; position: relative; transition: all 0.4s ease;
+}
+
+.visor {
+    width: 65px; height: 32px; background: #000; border-radius: 10px;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    border: 1px solid #222; overflow: hidden; position: relative;
+}
+.eye {
+    width: 8px; height: 8px; background: var(--neon-blue); border-radius: 50%;
+    box-shadow: 0 0 10px var(--neon-blue); transition: 0.2s; position: relative;
+}
+
+.mouth-plate { width: 36px; height: 10px; background: #050505; border-radius: 4px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.mouth-line { width: 20px; height: 2px; background: #555; border-radius: 2px; transition: 0.1s; }
+.mouth-line.talking { width: 28px; height: 4px; background: var(--gold); box-shadow: 0 0 8px var(--gold); animation: talkPulse 0.15s infinite alternate; }
+
+/* EMOTIONS */
+.bot-head.happy .eye { background: var(--gold); height: 10px; }
+.bot-head.sad .eye { background: var(--neon-red); height: 4px; transform: rotate(15deg); }
+.bot-head.sad .eye:last-child { transform: rotate(-15deg); }
+
+/* PREDICTION CARD */
+.reactor-body { padding: 0 20px 20px; width: 100%; }
+.pred-card { animation: predGlow 4s infinite; 
+    background: #000; border: 1px solid #333; border-radius: 16px;
+    padding: 15px 25px; width: 100%;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+}
+.pc-lbl { font-size: 10px; color: #666; font-weight: 800; letter-spacing: 1px; margin-bottom: 2px; }
+.pc-val { font-size: 28px; font-weight: 900; letter-spacing: 1px; color: #fff; }
+.pc-sub { font-size: 10px; color: var(--gold); font-weight: 700; font-family: var(--font-tech); }
+
+/* STATS GRID */
+.stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+}
+.stat-box {
+    background: rgba(255,255,255,0.03); border: var(--border); border-radius: 10px;
+    padding: 10px; display: flex; flex-direction: column; align-items: center;
+}
+.sb-lbl { font-size: 9px; color: #666; font-weight: 800; margin-bottom: 2px; text-transform: uppercase; }
+.sb-val { font-size: 16px; font-weight: 800; font-family: var(--font-tech); color: #fff; }
+
+/* HISTORY CHIPS */
+.history-wrap { background: var(--card); border: var(--border); border-radius: 16px; padding: 15px; margin-bottom: 15px; }
+.h-lbl { font-size: 10px; color: #555; font-weight: 800; margin-bottom: 12px; text-align: center; }
+.chip-grid { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.chip { 
+    width: 28px; height: 28px; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 11px; font-weight: 800; color: #000; position: relative; 
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+.chip.new::after { content:''; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid #fff; animation: pulseDot 1s infinite; }
+
+.chip.red { background: var(--neon-red); } 
+.chip.green { background: var(--neon-green); }
+.chip.violet-red { 
+    background: linear-gradient(90deg, var(--neon-red) 50%, var(--violet) 50%); 
+    color: #fff; 
+}
+.chip.violet-green { 
+    background: linear-gradient(90deg, var(--neon-green) 50%, var(--violet) 50%); 
+    color: #fff; 
+}
+
+/* CONTROLS */
+.controls { display: flex; gap: 10px; margin-top: 10px; }
+input { background: #111; border: 1px solid #333; color: #fff; padding: 16px; border-radius: 12px; flex: 1; text-align: center; font-family: var(--font-tech); font-weight: 700; outline: none; font-size: 18px; }
+button { background: #fff; color: #000; border: none; padding: 16px; border-radius: 12px; font-weight: 800; cursor: pointer; flex: 1; font-size: 14px; }
+.btn-reset { width: 100%; background: rgba(255, 77, 77, 0.15); color: var(--neon-red); border: 1px solid var(--neon-red); margin-top: 10px; border-radius: 12px; padding: 14px; font-weight: 800; cursor: pointer; }
+
+@keyframes hoverSafe { 0%{transform:translateY(0);} 50%{transform:translateY(-6px);} 100%{transform:translateY(0);} }
+@keyframes talkPulse { 0%{width:10px; opacity:0.7;} 100%{width:25px; opacity:1;} }
+@keyframes pulseDot { 0%{opacity:0.5;} 50%{opacity:1;} 100%{opacity:0.5;} }
+@keyframes scanEye { 0%{height:16px;} 100%{height:4px;} }
+@keyframes flinch { 0%{transform:scale(1);} 50%{transform:scale(0.9);} 100%{transform:scale(1);} }
+@keyframes predGlow { 0%{box-shadow: inset 0 0 20px rgba(255,255,255,0.05);} 50%{box-shadow: inset 0 0 40px rgba(255,255,255,0.15);} 100%{box-shadow: inset 0 0 20px rgba(255,255,255,0.05);} }
+</style>
+</head>
+<body>
+
+<audio id="sfxWin" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
+<audio id="sfxLoss" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3" preload="auto"></audio>
+<div id="floor-bg"></div>
+
+<div class="container" id="app">
+    <div class="app-header">
+        <div class="app-title">KIRA CASINO PRO</div>
+        <div class="live-badge"><div class="live-dot"></div>NO WAIT</div>
+    </div>
+
+    <div class="reactor" id="mainReactor">
+        <div class="period-bar">
+            <div class="period-tag">ID: <span id="issueDisplay">SYNCING...</span></div>
+        </div>
+
+        <div class="timer-stage">
+            <svg class="timer-svg" viewBox="0 0 100 100">
+                <circle class="timer-circle-bg" cx="50" cy="50" r="45"></circle>
+                <circle class="timer-circle-fg" id="timerCircle" cx="50" cy="50" r="45"></circle>
+            </svg>
+            <div class="timer-text-overlay" id="timer">--</div>
+        </div>
+
+        <div class="buddy-stage">
+            <div class="thought-bubble" id="chatBubble">Always Predicting.</div>
+            
+            <div class="bot-container" id="botContainer" onclick="toggleVoice()">
+                <div class="antenna-rod"></div>
+                <div class="antenna-tip" id="antenna"></div>
+                
+                <div class="bot-head" id="bot">
+                    <div class="visor">
+                        <div class="eye" id="eyeL"></div>
+                        <div class="eye" id="eyeR"></div>
+                    </div>
+                    <div class="mouth-plate">
+                        <div class="mouth-line" id="mouth"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="reactor-body">
+            <div class="pred-card" id="predBox">
+                <div class="pc-left">
+                    <div class="pc-lbl">PREDICTION</div>
+                    <div class="pc-val" id="predText">WAIT</div>
+                </div>
+                <div class="pc-right">
+                    <div class="pc-lbl">NEXT BET</div>
+                    <div class="pc-val" id="nextBetAmount">₹10</div>
+                    <div class="pc-sub">LEVEL <span id="lvlBadge">1</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="sb-lbl">WINS / LOSS</div>
+            <div class="sb-val"><span style="color:var(--neon-green)" id="wins">0</span> / <span style="color:var(--neon-red)" id="losses">0</span></div>
+        </div>
+        <div class="stat-box">
+            <div class="sb-lbl">MAX STREAKS</div>
+            <div class="sb-val"><span style="color:var(--neon-green)" id="maxWin">0</span> / <span style="color:var(--neon-red)" id="maxLoss">0</span></div>
+        </div>
+        <div class="stat-box" style="grid-column: span 2;">
+            <div class="sb-lbl">SESSION PROFIT</div>
+            <div class="sb-val" id="profitDisplay">₹0</div>
+        </div>
+    </div>
+
+    <div class="history-wrap">
+        <div class="h-lbl">30S MARKET HISTORY</div>
+        <div class="chip-grid" id="trendGrid"></div>
+    </div>
+
+    <div class="controls">
+        <input type="number" id="bet" value="10">
+        <button onclick="setBase()">SET BASE</button>
+    </div>
+    <button class="btn-reset" onclick="reset()">FACTORY RESET</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const app = initializeApp({ apiKey: "AIzaSyB7IKW5QFsnUE0wEdOmEJZjiO9BQ8ztqwE", authDomain: "kira-abba9.firebaseapp.com", databaseURL: "https://kira-abba9-default-rtdb.firebaseio.com", projectId: "kira-abba9", storageBucket: "kira-abba9.firebasestorage.app", messagingSenderId: "556959181297", appId: "1:556959181297:web:fb0890b8951c0b25ab7c50", measurementId: "G-BBKC0W0ZPJ" });
+const db = getFirestore(app);
+
+const saved = localStorage.getItem("kira_access_key");
+if(saved) document.getElementById("accessKey").value = saved;
+
+window.validateKey = async () => {
+    // Auto-validated for this version
+    speak("Aggressive Mode Active."); startLife();
+}
+</script>
+
+<script>
+// --- AGGRESSIVE LOGIC ---
+const API = "https://api.allorigins.win/raw?url=https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?pageNo=1&pageSize=60"; 
+
+let state = JSON.parse(localStorage.getItem("kira_agg_v160")) || {
+  wins: 0, losses: 0, lossStreak: 0, winStreak: 0, 
+  maxWinStreak: 0, maxLossStreak: 0,
+  lockedIssue: null, lockedPrediction: null, evaluatedIssue: null,
+  baseBet: 10, currentBet: 10, level: 1, totalProfit: 0, voice: true
+};
+
+function colorOf(n) {
+  const num = Number(n);
+  if (Number.isNaN(num)) return "";
+  if (num === 0) return "violet-red";
+  if (num === 5) return "violet-green";
+  return num % 2 === 0 ? "red" : "green";
+}
+
+function nextIssue(issue){
+  if(!issue) return "";
+  try { return (BigInt(issue) + 1n).toString(); } 
+  catch(e) { return issue; }
+}
+
+function updateUI() {
+    const pEl = document.getElementById("profitDisplay");
+    pEl.innerText = (state.totalProfit >= 0 ? "+" : "") + "₹" + state.totalProfit;
+    pEl.className = "sb-val " + (state.totalProfit >= 0 ? "green" : "red");
+    
+    document.getElementById("wins").innerText = state.wins;
+    document.getElementById("losses").innerText = state.losses;
+    document.getElementById("maxWin").innerText = state.maxWinStreak;
+    document.getElementById("maxLoss").innerText = state.maxLossStreak;
+    
+    document.getElementById("predText").style.color = "#fff";
+    document.getElementById("nextBetAmount").innerText = "₹" + state.currentBet;
+    document.getElementById("lvlBadge").innerText = state.level;
+}
+
+function playSound(type) { 
+    const id = type === 'win' ? "sfxWin" : "sfxLoss";
+    document.getElementById(id).play().catch(()=>{}); 
+}
+
+let talkTimer;
+let lastMsg = "";
+function toggleVoice() {
+    state.voice = !state.voice;
+    const bot = document.getElementById("botContainer");
+    bot.classList.add("poke");
+    setTimeout(() => bot.classList.remove("poke"), 300);
+    setMood("happy", state.voice ? "Voice Active" : "Voice Muted");
+    save();
+}
+
+function speak(text) {
+    if(text === lastMsg) return; lastMsg = text;
+    const bubble = document.getElementById("chatBubble");
+    const mouth = document.getElementById("mouth");
+    clearTimeout(talkTimer);
+    bubble.innerText = text; bubble.classList.add("show"); mouth.classList.add("talking");
+    if(state.voice && window.speechSynthesis) {
+        const u = new SpeechSynthesisUtterance(text);
+        u.pitch = 0.9; u.rate = 1.1; 
+        window.speechSynthesis.speak(u);
+    }
+    talkTimer = setTimeout(() => { bubble.classList.remove("show"); mouth.classList.remove("talking"); }, 5000); 
+}
+
+function setMood(mood, text) {
+    const bot = document.getElementById("bot");
+    bot.className = "bot-head"; if(mood) bot.classList.add(mood);
+    speak(text);
+}
+
+// --- FORCEFUL LOGIC ---
+function analyzefunction analyze(list) {
+    if(!list || list.length < 10) return { action:"WAIT", reason:"Syncing..." };
+
+    // HARD STOP GATE: if already 10 losses, freeze betting
+    if(state.lossStreak >= 10){
+        return { action:"WAIT", reason:"Hard Stop Reached" };
+    }
+
+    // Convert last results to colors array
+    const colors = list.slice(0,10).map(it => colorOf(it.number));
+
+    const last = colors[0];
+    const prev = colors[1];
+    const prev2 = colors[2];
+
+    // --- Detect strict R,G,R,G pattern in last 6 rounds ---
+    let alternating = true;
+    for(let i=1;i<6;i++){
+        if(colors[i] === colors[i-1]) { alternating = false; break; }
+    }
+    if(alternating){
+        // KILLER MODE: always play REVERSE of last in pure alternation
+        return last.includes("red")
+            ? {action:"GREEN", reason:"Anti R-G Killer Mode"}
+            : {action:"RED", reason:"Anti R-G Killer Mode"};
+    }
+
+    // --- Count current streak ---
+    let streak = 0;
+    for(let i=0;i<8;i++){
+        if(colors[i] === last) streak++;
+        else break;
+    }
+
+    // If long streak (>=3) -> reverse
+    if(streak >= 3){
+        return last.includes("red")
+            ? {action:"GREEN", reason:"Break long streak"}
+            : {action:"RED", reason:"Break long streak"};
+    }
+
+    // --- Majority of last 7 results ---
+    let red=0, green=0;
+    for(let i=0;i<7;i++){
+        if(colors[i].includes("red")) red++;
+        else green++;
+    }
+    if(red > green + 1){
+        return {action:"RED", reason:"Market majority red"};
+    }
+    if(green > red + 1){
+        return {action:"GREEN", reason:"Market majority green"};
+    }
+
+    // --- Double pattern follow ---
+    if(last === prev){
+        return last.includes("red")
+            ? {action:"RED", reason:"Follow double"}
+            : {action:"GREEN", reason:"Follow double"};
+    }
+
+    // --- Alternation fallback ---
+    if(last === prev2){
+        return last.includes("red")
+            ? {action:"GREEN", reason:"Alternation play"}
+            : {action:"RED", reason:"Alternation play"};
+    }
+
+    // Default: follow last
+    return last.includes("red")
+        ? {action:"RED", reason:"Default follow"}
+        : {action:"GREEN", reason:"Default follow"};
+}
+
+}
+
+async function tick() {
+    try {
+        const res = await fetch(API + "&_t=" + Date.now()); 
+        const json = await res.json(); 
+        const list = json.data.list;
+        
+        const completedIssue = String(list[0].issueNumber);
+        const bettingIssue = nextIssue(completedIssue);
+        
+        document.getElementById("issueDisplay").innerText = bettingIssue;
+        
+        const grid = document.getElementById("trendGrid"); grid.innerHTML = "";
+        list.slice(0, 10).reverse().forEach((item, index) => { 
+            const n = Number(item.number); const div = document.createElement("div"); 
+            let cls = "chip"; 
+            if(n===0) cls+=" violet-red"; else if(n===5) cls+=" violet-green"; 
+            else if(n%2===0) cls+=" red"; else cls+=" green"; 
+            if(index === 9) cls+=" new";
+            div.className = cls; div.innerText = n; 
+            grid.appendChild(div); 
+        });
+
+        if (state.lockedIssue === completedIssue && state.evaluatedIssue !== completedIssue) {
+            const latestColors = colorOf(list[0].number);
+            
+            if(state.lockedPrediction) {
+                const won = latestColors.includes(state.lockedPrediction);
+                
+                if (won) {
+                    state.wins++; state.lossStreak = 0; state.winStreak++;
+                    if(state.winStreak > state.maxWinStreak) state.maxWinStreak = state.winStreak;
+                    state.totalProfit += state.currentBet; 
+                    state.level = 1; state.currentBet = state.baseBet; 
+                    setMood("happy", "Win on level " + state.level);
+                } else {
+                    state.losses++; state.lossStreak++; state.winStreak = 0;
+                    if(state.lossStreak > state.maxLossStreak) state.maxLossStreak = state.lossStreak;
+                    state.totalProfit -= state.currentBet;
+                    // loss sound removed 
+                    
+                    // === SMART BET + HARD STOP AT 10 ===
+                    state.level++;
+                    
+                    // HARD STOP at 7 losses
+                    if(state.lossStreak >= 10){
+                        state.currentBet = state.baseBet; // reset bet and freeze
+                        state.level = 1;
+                        setMood("sad", "Hard Stop at 10 losses.");
+                    } else {
+                        // even smoother growth
+                        state.currentBet = Math.round(state.baseBet * Math.pow(1.7, state.level - 1));
+                        setMood("sad", "Level " + state.level);
+                    }
+                }
+            }
+            state.evaluatedIssue = completedIssue; state.lockedPrediction = null; state.lockedIssue = null;
+            updateUI(); save();
+        }
+
+        if(state.lockedIssue !== bettingIssue) {
+            const dec = analyze(list);
+            const txt = document.getElementById("predText");
+            const box = document.getElementById("predBox");
+
+            if(dec.action === "WAIT") {
+                txt.innerText = "WAIT"; txt.style.color = "#888"; box.style.borderColor = "#333";
+            } else {
+                state.lockedIssue = bettingIssue;
+                state.lockedPrediction = dec.action.toLowerCase();
+                save();
+                document.getElementById("antenna").classList.add("spark");
+                setTimeout(() => document.getElementById("antenna").classList.remove("spark"), 300);
+                txt.innerText = dec.action;
+                if(dec.action === "RED") { txt.style.color = "var(--neon-red)"; box.style.borderColor = "var(--neon-red)"; }
+                else { txt.style.color = "var(--neon-green)"; box.style.borderColor = "var(--neon-green)"; }
+                setMood("happy", dec.reason);
+            }
+        }
+    } catch(e) {}
+}
+
+function setBase() { 
+    const v = Number(document.getElementById("bet").value); 
+    if(v > 0) { 
+        state.baseBet = v; state.currentBet = v; state.level = 1; 
+        state.lossStreak = 0; state.totalProfit = 0;
+        state.wins = 0; state.losses = 0;
+        state.winStreak = 0; state.maxWinStreak = 0; state.maxLossStreak = 0;
+        save(); updateUI(); setMood("happy", "Base aligned.");
+    } 
+}
+
+function reset() { if(confirm("Factory Reset?")) { localStorage.removeItem("kira_agg_v160"); location.reload(); } }
+function save() { localStorage.setItem("kira_agg_v160", JSON.stringify(state)); }
+
+setInterval(tick, 1000); 
+
+document.addEventListener("mousemove", (e) => {
+    const eyeL = document.getElementById("eyeL"); const eyeR = document.getElementById("eyeR");
+    if(!eyeL) return;
+    const x = (e.clientX / window.innerWidth) * 6 - 3; const y = (e.clientY / window.innerHeight) * 6 - 3;
+    eyeL.style.transform = `translate(${x}px, ${y}px)`; eyeR.style.transform = `translate(${x}px, ${y}px)`;
+});
+
+setInterval(() => {
+    const s = new Date().getSeconds();
+    const remaining = 30 - (s % 30);
+    const el = document.getElementById("timer");
+    const circle = document.getElementById("timerCircle");
+    el.innerText = remaining < 10 ? "0" + remaining : remaining;
+    
+    const offset = 283 - (remaining / 30) * 283;
+    circle.style.strokeDashoffset = offset;
+    
+    if(remaining < 10) { circle.style.stroke = "var(--neon-red)"; } 
+    else { circle.style.stroke = "var(--gold)"; }
+}, 100);
+
+updateUI();
+</script>
+</body>
+</html>
